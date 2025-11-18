@@ -137,7 +137,7 @@ export const MemoryGame: React.FC<MemoryGameProps> = ({ onSuccess, onDecay }) =>
   const timerPercentage = (timeLeft / TOTAL_TIME) * 100;
 
   return (
-    <div className="flex flex-col md:flex-row items-center justify-center gap-8 animate-fade-in w-full max-w-2xl mx-auto p-4">
+    <div className="flex flex-col md:flex-row items-center justify-center gap-8 animate-fade-in w-full max-w-2xl mx-auto p-4 mt-8">
       {/* Timer Section - Top on mobile, Left on desktop */}
       <div className="flex flex-col items-center gap-4 order-2 md:order-1">
         <div className="text-3xl md:text-5xl font-bold text-cyan-300 tabular-nums text-center" style={{ textShadow: '0 0 8px #06b6d4' }}>

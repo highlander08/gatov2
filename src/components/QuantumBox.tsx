@@ -103,7 +103,7 @@ export const QuantumBox: React.FC<QuantumBoxProps> = ({ appState, catState }) =>
       : `translateY(-${HALF_SIZE_REM}rem) rotateX(90deg)`; // Closed state
   
     return (
-      <div className="relative w-full h-96 flex items-center justify-center" style={{ perspective: '1000px' }}>
+      <div className="relative w-full h-96 flex items-center justify-center mt-24" style={{ perspective: '1000px' }}>
         
         {/* External items */}
         <div className={`absolute flex items-center justify-center gap-4 transition-all duration-1000 ease-in-out ${elementsContainerClass}`}>
