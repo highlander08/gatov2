@@ -1,65 +1,174 @@
-import Image from "next/image";
+// App.tsx
+"use client";
+import React, { useState, useCallback, useMemo } from 'react';
+import { MemoryGame } from '../components/MemoryGame';
+import { QuantumBox } from '../components/QuantumBox';
+import { AppState, CatState } from '../types';
 
-export default function Home() {
+const App: React.FC = () => {
+  const [appState, setAppState] = useState<AppState>(AppState.PRE_SIMULATION);
+  const [catState, setCatState] = useState<CatState>(CatState.SUPERPOSITION);
+  const [gameKey, setGameKey] = useState<number>(0);
+  const [showMemoryGame, setShowMemoryGame] = useState(false);
+
+  const handleStart = () => {
+    setAppState(AppState.SUPERPOSITION);
+    setTimeout(() => {
+      setShowMemoryGame(true);
+    }, 1500);
+  };
+  
+  const handleSuccess = useCallback(() => {
+    setCatState(CatState.ALIVE);
+    setAppState(AppState.REVEALING);
+    setShowMemoryGame(false);
+  }, []);
+
+  const handleDecay = useCallback(() => {
+    setCatState(CatState.DEAD);
+    setAppState(AppState.DECAYED);
+    setShowMemoryGame(false);
+  }, []);
+
+  const handleReset = () => {
+    setCatState(CatState.SUPERPOSITION);
+    setAppState(AppState.PRE_SIMULATION);
+    setShowMemoryGame(false);
+    setGameKey(prevKey => prevKey + 1);
+  };
+  
+  const resultData = useMemo(() => {
+    if (appState === AppState.REVEALING && catState === CatState.ALIVE) {
+      return {
+        title: "Você salvou o gato!",
+        titleClass: "text-green-400",
+        text: "A função de onda colapsou em um estado feliz 🐾.",
+        buttonText: "Simular Novamente",
+      };
+    }
+    return null;
+  }, [catState, appState]);
+
+  const getHeaderText = () => {
+    switch(appState) {
+      case AppState.PRE_SIMULATION:
+        return "Um Gato e seu Destino Quântico";
+      case AppState.SUPERPOSITION:
+        return "Observando a Superposição...";
+      case AppState.REVEALING:
+        return catState === CatState.ALIVE ? "Observação Bem-sucedida!" : "Função de Onda Colapsou!";
+      case AppState.DECAYED:
+        return "Decaimento Atômico Ocorreu!";
+      default:
+        return "Gato de Schrödinger";
+    }
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="bg-quantum-dark text-gray-100 min-h-screen flex items-center justify-center p-4 font-mono select-none relative z-10 overflow-hidden">
+      <div className="w-full max-w-7xl flex flex-col md:flex-row items-stretch rounded-lg bg-slate-900/40 shadow-2xl shadow-cyan-500/10 border border-cyan-500/20 min-h-[600px]">
+        
+        {/* Left Column: Information */}
+        <aside className="w-full md:w-1/3 p-6 md:p-8 border-b-2 md:border-b-0 md:border-r-2 border-cyan-500/20 text-center md:text-left flex flex-col">
+          <div className="flex-1">
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-cyan-400 mb-2 tracking-wider text-center md:text-left" 
+                style={{ textShadow: '0 0 10px #06b6d4, 0 0 5px #06b6d4' }}>
+              Gato de Schrödinger
+            </h1>
+            <h2 className="text-lg md:text-xl text-gray-300 mb-6 md:mb-8 opacity-80 text-center md:text-left">
+              {getHeaderText()}
+            </h2>
+
+            <div className="text-gray-400 space-y-4 md:space-y-6">
+              <div>
+                <h3 className="font-bold text-cyan-300 text-lg mb-2">O Conceito</h3>
+                <p className="text-sm leading-relaxed">
+                  Um gato é colocado em uma caixa selada com um mecanismo que pode matá-lo, baseado no decaimento de um átomo radioativo.
+                </p>
+              </div>
+              <div>
+                <h3 className="font-bold text-cyan-300 text-lg mb-2">Superposição</h3>
+                <p className="text-sm leading-relaxed">
+                  Enquanto a caixa está fechada, o gato existe em uma "superposição" de estados — ele é considerado simultaneamente <strong>vivo E morto</strong>.
+                </p>
+              </div>
+              <div>
+                <h3 className="font-bold text-cyan-300 text-lg mb-2">O Observador</h3>
+                <p className="text-sm leading-relaxed">
+                  Somente ao abrir a caixa (observar) o destino do gato é selado. Sua observação força o universo a "escolher" um estado. Você será o observador.
+                </p>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        {/* Right Column: Simulation */}
+        <div className="w-full md:w-2/3 p-4 md:p-6 flex flex-col items-center justify-center">
+          <main className="w-full max-w-2xl flex flex-col items-center justify-center space-y-6">
+            <div className="w-full flex justify-center">
+              <QuantumBox appState={appState} catState={catState} />
+            </div>
+
+            {/* Game States */}
+            <div className="w-full flex flex-col items-center justify-center min-h-[200px]">
+              {appState === AppState.PRE_SIMULATION && (
+                <div className="animate-fade-in">
+                  <button
+                    onClick={handleStart}
+                    className="px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold rounded-lg shadow-lg shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105 text-lg"
+                  >
+                    Iniciar Simulação
+                  </button>
+                </div>
+              )}
+
+              {appState === AppState.SUPERPOSITION && showMemoryGame && (
+                <div className="w-full flex justify-center">
+                  <MemoryGame
+                    key={gameKey}
+                    onSuccess={handleSuccess}
+                    onDecay={handleDecay}
+                  />
+                </div>
+              )}
+
+              {appState === AppState.REVEALING && resultData && (
+                <div className="animate-fade-in text-center w-full">
+                  <h3 className={`text-2xl md:text-3xl font-bold ${resultData.titleClass} mb-4`}>
+                    {resultData.title}
+                  </h3>
+                  <p className="text-gray-400 mb-6">{resultData.text}</p>
+                  <button
+                    onClick={handleReset}
+                    className="px-8 py-3 bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold rounded-lg shadow-lg shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105"
+                  >
+                    {resultData.buttonText}
+                  </button>
+                </div>
+              )}
+              
+              {appState === AppState.DECAYED && (
+                <div className="animate-fade-in text-center w-full">
+                  <h3 className="text-2xl md:text-3xl font-bold text-red-500 mb-4">
+                    O Átomo Decaiu!
+                  </h3>
+                  <p className="text-gray-400 mb-6">
+                    O tempo se esgotou. O destino do gato foi selado pelo decaimento.
+                  </p>
+                  <button
+                    onClick={handleReset}
+                    className="px-8 py-3 bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold rounded-lg shadow-lg shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105"
+                  >
+                    Tentar Salvar Outro Gato
+                  </button>
+                </div>
+              )}
+            </div>
+          </main>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </div>
     </div>
   );
-}
+};
+
+export default App;
