@@ -1,6 +1,6 @@
 // App.tsx
 "use client";
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { MemoryGame } from '../components/MemoryGame';
 import { QuantumBox } from '../components/QuantumBox';
 import { AppState, CatState } from '../types';
@@ -9,10 +9,25 @@ const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.PRE_SIMULATION);
   const [catState, setCatState] = useState<CatState>(CatState.SUPERPOSITION);
   const [gameKey, setGameKey] = useState<number>(0);
+  const [decayTime, setDecayTime] = useState(30);
   const [showMemoryGame, setShowMemoryGame] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Efeito para limpar o áudio quando o componente for desmontado
+  useEffect(() => {
+    const audio = audioRef.current;
+    return () => {
+      audio?.pause();
+    };
+  }, []);
 
   const handleStart = () => {
     setAppState(AppState.SUPERPOSITION);
+    audioRef.current = new Audio('/sounds/cat-meow.mp3');
+    audioRef.current.loop = true;
+    audioRef.current.play();
+    // Gera um tempo de decaimento aleatório entre 3 e 30 segundos
+    setDecayTime(Math.floor(Math.random() * (30 - 3 + 1)) + 3);
     setTimeout(() => {
       setShowMemoryGame(true);
     }, 1500);
@@ -26,25 +41,36 @@ const App: React.FC = () => {
 
   const handleDecay = useCallback(() => {
     setCatState(CatState.DEAD);
-    setAppState(AppState.DECAYED);
+    audioRef.current?.pause();
+    setAppState(AppState.REVEALING);
     setShowMemoryGame(false);
   }, []);
 
   const handleReset = () => {
     setCatState(CatState.SUPERPOSITION);
     setAppState(AppState.PRE_SIMULATION);
+    audioRef.current?.pause();
     setShowMemoryGame(false);
     setGameKey(prevKey => prevKey + 1);
   };
   
   const resultData = useMemo(() => {
-    if (appState === AppState.REVEALING && catState === CatState.ALIVE) {
-      return {
-        title: "Você salvou o gato!",
-        titleClass: "text-green-400",
-        text: "A função de onda colapsou em um estado feliz 🐾.",
-        buttonText: "Simular Novamente",
-      };
+    if (appState === AppState.REVEALING) {
+      if (catState === CatState.ALIVE) {
+        return {
+          title: "Você salvou o gato!",
+          titleClass: "text-green-400",
+          text: "A função de onda colapsou em um estado feliz 🐾.",
+          buttonText: "Simular Novamente",
+        };
+      } else if (catState === CatState.DEAD) {
+        return {
+          title: "O Átomo Decaiu!",
+          titleClass: "text-red-500",
+          text: "O tempo se esgotou. O destino do gato foi selado pelo decaimento.",
+          buttonText: "Tentar Salvar Outro Gato",
+        };
+      }
     }
     return null;
   }, [catState, appState]);
@@ -128,6 +154,7 @@ const App: React.FC = () => {
                     key={gameKey}
                     onSuccess={handleSuccess}
                     onDecay={handleDecay}
+                    decayTime={decayTime}
                   />
                 </div>
               )}
@@ -143,23 +170,6 @@ const App: React.FC = () => {
                     className="px-8 py-3 bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold rounded-lg shadow-lg shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105"
                   >
                     {resultData.buttonText}
-                  </button>
-                </div>
-              )}
-              
-              {appState === AppState.DECAYED && (
-                <div className="animate-fade-in text-center w-full">
-                  <h3 className="text-2xl md:text-3xl font-bold text-red-500 mb-4">
-                    O Átomo Decaiu!
-                  </h3>
-                  <p className="text-gray-400 mb-6">
-                    O tempo se esgotou. O destino do gato foi selado pelo decaimento.
-                  </p>
-                  <button
-                    onClick={handleReset}
-                    className="px-8 py-3 bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold rounded-lg shadow-lg shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105"
-                  >
-                    Tentar Salvar Outro Gato
                   </button>
                 </div>
               )}

@@ -9,21 +9,23 @@ import {
   ACTIVE_COLOR_STYLES,
   SEQUENCE_INTERVAL,
   HIGHLIGHT_DURATION,
-  TOTAL_TIME,
+  TOTAL_TIME, // Você pode remover esta importação se não for usada em outros lugares
 } from '../constants';
 
 interface MemoryGameProps {
   onSuccess: () => void;
   onDecay: () => void;
+  decayTime: number;
 }
 
-export const MemoryGame: React.FC<MemoryGameProps> = ({ onSuccess, onDecay }) => {
+export const MemoryGame: React.FC<MemoryGameProps> = ({ onSuccess, onDecay, decayTime }) => {
   const [sequence, setSequence] = useState<string[]>([]);
   const [playerSequence, setPlayerSequence] = useState<string[]>([]);
   const [isPlayerTurn, setIsPlayerTurn] = useState(false);
   const [activeColor, setActiveColor] = useState<Color | null>(null);
   const [message, setMessage] = useState('Aguarde, preparando a superposição...');
-  const [timeLeft, setTimeLeft] = useState(TOTAL_TIME);
+  const [timeLeft, setTimeLeft] = useState(decayTime * 1000);
+  const [totalTime, setTotalTime] = useState(decayTime * 1000);
   const [isGameActive, setIsGameActive] = useState(false);
   const intervalRef = useRef<number | null>(null);
 
@@ -44,6 +46,7 @@ export const MemoryGame: React.FC<MemoryGameProps> = ({ onSuccess, onDecay }) =>
   const playSequence = useCallback(() => {
     setIsPlayerTurn(false);
     setMessage('Observe a sequência...');
+    
     sequence.forEach((digit, index) => {
       setTimeout(() => {
         setActiveColor(COLOR_MAP[digit]);
@@ -70,24 +73,25 @@ export const MemoryGame: React.FC<MemoryGameProps> = ({ onSuccess, onDecay }) =>
   }, [sequence, playSequence]);
 
   useEffect(() => {
-    if (isGameActive) {
-      intervalRef.current = window.setInterval(() => {
-        setTimeLeft(prevTime => {
-          const newTime = prevTime - 100;
-          if (newTime <= 0) {
-            if(intervalRef.current) clearInterval(intervalRef.current);
-            setIsGameActive(false);
-            onDecay();
-            return 0;
-          }
-          return newTime;
-        });
-      }, 100);
+    if (!isGameActive || timeLeft <= 0) {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      return;
     }
+
+      intervalRef.current = window.setInterval(() => {
+      setTimeLeft(prevTime => prevTime - 100);
+      }, 100);
+
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [isGameActive, onDecay]);
+  }, [isGameActive, timeLeft]);
+
+  useEffect(() => {
+    if (isGameActive && timeLeft <= 0) {
+      onDecay();
+    }
+  }, [timeLeft, isGameActive, onDecay]);
 
   const processPlayerInput = useCallback((digit: string) => {
     if (!isPlayerTurn || !isGameActive) return;
@@ -134,7 +138,7 @@ export const MemoryGame: React.FC<MemoryGameProps> = ({ onSuccess, onDecay }) =>
     processPlayerInput(digit);
   };
   
-  const timerPercentage = (timeLeft / TOTAL_TIME) * 100;
+  const timerPercentage = totalTime > 0 ? (timeLeft / totalTime) * 100 : 0;
 
   return (
     <div className="flex flex-col md:flex-row items-center justify-center gap-8 animate-fade-in w-full max-w-2xl mx-auto p-4 mt-8">
