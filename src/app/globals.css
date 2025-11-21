@@ -26,6 +26,24 @@ body {
 }
 
 @layer utilities {
+  @keyframes quantum-grid {
+    0% {
+      background-position: 0 0;
+    }
+    100% {
+      background-position: 2rem 2rem;
+    }
+  }
+
+  @keyframes aurora {
+    from {
+      background-position: 50% 50%, 50% 50%;
+    }
+    to {
+      background-position: 350% 50%, 350% 50%;
+    }
+  }
+
   .animate-pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
   }

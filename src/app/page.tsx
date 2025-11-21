@@ -94,8 +94,22 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="bg-quantum-dark text-gray-100 min-h-screen flex items-center justify-center p-4 font-mono select-none relative z-10 overflow-hidden">
-      <div className="w-full max-w-7xl flex flex-col md:flex-row items-stretch rounded-lg bg-slate-900/40 shadow-2xl shadow-cyan-500/10 border border-cyan-500/20 min-h-[600px]">
+    <div
+      className="bg-slate-950 text-gray-100 min-h-screen flex items-center justify-center p-4 font-mono select-none relative z-0 overflow-hidden
+                 before:absolute before:inset-0 before:-z-10
+                 before:bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.1)_0%,transparent_50%)]
+                 before:[mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]
+                 
+                 after:absolute after:inset-0 after:-z-20 after:bg-slate-950
+                 after:[background-image:linear-gradient(to_right,rgba(6,182,212,0.1)_1px,transparent_1px),linear-gradient(to_bottom,rgba(6,182,212,0.1)_1px,transparent_1px)]
+                 after:[background-size:2rem_2rem] after:animate-quantum-grid"
+    >
+      <motion.div
+        className="w-full max-w-7xl flex flex-col md:flex-row items-stretch rounded-lg bg-slate-900/40 shadow-2xl shadow-cyan-500/10 border border-cyan-500/20 min-h-[600px]"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      >
         {/* Left Column: Information */}
         <aside className="w-full md:w-1/3 p-6 md:p-8 border-b-2 md:border-b-0 md:border-r-2 border-cyan-500/20 text-center md:text-left flex flex-col">
           <div className="flex-1">
@@ -219,7 +233,7 @@ const App: React.FC = () => {
             </div>
           </main>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
