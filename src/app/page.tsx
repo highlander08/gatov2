@@ -32,7 +32,7 @@ const App: React.FC = () => {
       setShowMemoryGame(true);
     }, 1500);
   };
-  
+
   const handleSuccess = useCallback(() => {
     setCatState(CatState.ALIVE);
     setAppState(AppState.REVEALING);
@@ -51,9 +51,9 @@ const App: React.FC = () => {
     setAppState(AppState.PRE_SIMULATION);
     audioRef.current?.pause();
     setShowMemoryGame(false);
-    setGameKey(prevKey => prevKey + 1);
+    setGameKey((prevKey) => prevKey + 1);
   };
-  
+
   const resultData = useMemo(() => {
     if (appState === AppState.REVEALING) {
       if (catState === CatState.ALIVE) {
@@ -76,29 +76,32 @@ const App: React.FC = () => {
   }, [catState, appState]);
 
   const getHeaderText = () => {
-    switch(appState) {
+    switch (appState) {
       case AppState.PRE_SIMULATION:
         return "Um Gato e seu Destino Quântico";
       case AppState.SUPERPOSITION:
         return "Observando a Superposição...";
       case AppState.REVEALING:
-        return catState === CatState.ALIVE ? "Observação Bem-sucedida!" : "Função de Onda Colapsou!";
+        return catState === CatState.ALIVE
+          ? "Observação Bem-sucedida!"
+          : "Função de Onda Colapsou!";
       case AppState.DECAYED:
         return "Decaimento Atômico Ocorreu!";
       default:
         return "Gato de Schrödinger";
     }
-  }
+  };
 
   return (
     <div className="bg-quantum-dark text-gray-100 min-h-screen flex items-center justify-center p-4 font-mono select-none relative z-10 overflow-hidden">
       <div className="w-full max-w-7xl flex flex-col md:flex-row items-stretch rounded-lg bg-slate-900/40 shadow-2xl shadow-cyan-500/10 border border-cyan-500/20 min-h-[600px]">
-        
         {/* Left Column: Information */}
         <aside className="w-full md:w-1/3 p-6 md:p-8 border-b-2 md:border-b-0 md:border-r-2 border-cyan-500/20 text-center md:text-left flex flex-col">
           <div className="flex-1">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-cyan-400 mb-2 tracking-wider text-center md:text-left" 
-                style={{ textShadow: '0 0 10px #06b6d4, 0 0 5px #06b6d4' }}>
+            <h1
+              className="text-3xl md:text-4xl lg:text-5xl font-bold text-cyan-400 mb-2 tracking-wider text-center md:text-left"
+              style={{ textShadow: "0 0 10px #06b6d4, 0 0 5px #06b6d4" }}
+            >
               Gato de Schrödinger
             </h1>
             <h2 className="text-lg md:text-xl text-gray-300 mb-6 md:mb-8 opacity-80 text-center md:text-left">
@@ -107,21 +110,32 @@ const App: React.FC = () => {
 
             <div className="text-gray-400 space-y-4 md:space-y-6">
               <div>
-                <h3 className="font-bold text-cyan-300 text-lg mb-2">O Conceito</h3>
+                <h3 className="font-bold text-cyan-300 text-lg mb-2">
+                  O Conceito
+                </h3>
                 <p className="text-sm leading-relaxed">
-                  Um gato é colocado em uma caixa selada com um mecanismo que pode matá-lo, baseado no decaimento de um átomo radioativo.
+                  Um gato é colocado em uma caixa selada com um mecanismo que
+                  pode matá-lo, baseado no decaimento de um átomo radioativo.
                 </p>
               </div>
               <div>
-                <h3 className="font-bold text-cyan-300 text-lg mb-2">Superposição</h3>
+                <h3 className="font-bold text-cyan-300 text-lg mb-2">
+                  Superposição
+                </h3>
                 <p className="text-sm leading-relaxed">
-                  Enquanto a caixa está fechada, o gato existe em uma "superposição" de estados — ele é considerado simultaneamente <strong>vivo E morto</strong>.
+                  Enquanto a caixa está fechada, o gato existe em uma
+                  "superposição" de estados — ele é considerado simultaneamente{" "}
+                  <strong>vivo E morto</strong>.
                 </p>
               </div>
               <div>
-                <h3 className="font-bold text-cyan-300 text-lg mb-2">O Observador</h3>
+                <h3 className="font-bold text-cyan-300 text-lg mb-2">
+                  O Observador
+                </h3>
                 <p className="text-sm leading-relaxed">
-                  Somente ao abrir a caixa (observar) o destino do gato é selado. Sua observação força o universo a "escolher" um estado. Você será o observador.
+                  Somente ao abrir a caixa (observar) o destino do gato é
+                  selado. Sua observação força o universo a "escolher" um
+                  estado. Você será o observador.
                 </p>
               </div>
             </div>
@@ -161,7 +175,9 @@ const App: React.FC = () => {
 
               {appState === AppState.REVEALING && resultData && (
                 <div className="animate-fade-in text-center w-full">
-                  <h3 className={`text-2xl md:text-3xl font-bold ${resultData.titleClass} mb-4`}>
+                  <h3
+                    className={`text-2xl md:text-3xl font-bold ${resultData.titleClass} mb-4`}
+                  >
                     {resultData.title}
                   </h3>
                   <p className="text-gray-400 mb-6">{resultData.text}</p>
