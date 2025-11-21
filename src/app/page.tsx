@@ -1,6 +1,7 @@
 // App.tsx
 "use client";
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { MemoryGame } from '../components/MemoryGame';
 import { QuantumBox } from '../components/QuantumBox';
 import { AppState, CatState } from '../types';
@@ -151,44 +152,70 @@ const App: React.FC = () => {
 
             {/* Game States */}
             <div className="w-full flex flex-col items-center justify-center min-h-[200px]">
-              {appState === AppState.PRE_SIMULATION && (
-                <div className="animate-fade-in">
-                  <button
-                    onClick={handleStart}
-                    className="px-8 py-4 bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold rounded-lg shadow-lg shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105 text-lg"
+              <AnimatePresence mode="wait">
+                {appState === AppState.PRE_SIMULATION && (
+                  <motion.div
+                    key="start-button"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    transition={{ duration: 0.5 }}
                   >
-                    Iniciar Simulação
-                  </button>
-                </div>
-              )}
+                    <motion.button
+                      onClick={handleStart}
+                      className="px-8 py-4 bg-cyan-500 text-gray-900 font-bold rounded-lg shadow-lg shadow-cyan-500/50 text-lg"
+                      whileHover={{ scale: 1.05, backgroundColor: "#22d3ee" }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      Iniciar Simulação
+                    </motion.button>
+                  </motion.div>
+                )}
 
-              {appState === AppState.SUPERPOSITION && showMemoryGame && (
-                <div className="w-full flex justify-center">
-                  <MemoryGame
-                    key={gameKey}
-                    onSuccess={handleSuccess}
-                    onDecay={handleDecay}
-                    decayTime={decayTime}
-                  />
-                </div>
-              )}
+                {appState === AppState.SUPERPOSITION && showMemoryGame && (
+                  <motion.div
+                    key="memory-game"
+                    className="w-full flex justify-center"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    <MemoryGame
+                      key={gameKey}
+                      onSuccess={handleSuccess}
+                      onDecay={handleDecay}
+                      decayTime={decayTime}
+                    />
+                  </motion.div>
+                )}
 
-              {appState === AppState.REVEALING && resultData && (
-                <div className="animate-fade-in text-center w-full">
-                  <h3
-                    className={`text-2xl md:text-3xl font-bold ${resultData.titleClass} mb-4`}
+                {appState === AppState.REVEALING && resultData && (
+                  <motion.div
+                    key="result-screen"
+                    className="text-center w-full"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.5 }}
                   >
-                    {resultData.title}
-                  </h3>
-                  <p className="text-gray-400 mb-6">{resultData.text}</p>
-                  <button
-                    onClick={handleReset}
-                    className="px-8 py-3 bg-cyan-500 hover:bg-cyan-400 text-gray-900 font-bold rounded-lg shadow-lg shadow-cyan-500/50 transition-all duration-300 transform hover:scale-105"
-                  >
-                    {resultData.buttonText}
-                  </button>
-                </div>
-              )}
+                    <h3
+                      className={`text-2xl md:text-3xl font-bold ${resultData.titleClass} mb-4`}
+                    >
+                      {resultData.title}
+                    </h3>
+                    <p className="text-gray-400 mb-6">{resultData.text}</p>
+                    <motion.button
+                      onClick={handleReset}
+                      className="px-8 py-3 bg-cyan-500 text-gray-900 font-bold rounded-lg shadow-lg shadow-cyan-500/50"
+                      whileHover={{ scale: 1.05, backgroundColor: "#22d3ee" }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {resultData.buttonText}
+                    </motion.button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </main>
         </div>

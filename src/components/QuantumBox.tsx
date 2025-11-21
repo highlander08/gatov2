@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { AppState, CatState } from '../types';
 
 interface QuantumBoxProps {
@@ -88,36 +89,42 @@ export const QuantumBox: React.FC<QuantumBoxProps> = ({ appState, catState }) =>
       return '🔒';
     };
 
-    const elementsContainerClass = isPreSimulation
-      ? '-translate-y-64 opacity-100' // Start high above the box (16rem up)
-      : 'translate-y-0 opacity-0';   // Animate down to the box's vertical center (0) and fade
-    
     // 3D Box constants
     const BOX_SIZE_REM = 14; // Corresponds to w-56, h-56
     const HALF_SIZE_REM = BOX_SIZE_REM / 2;
     const faceBaseClass = `absolute w-full h-full border-4 border-cyan-500/50 rounded-lg`;
 
     const isOpen = isPreSimulation || isRevealing;
-    const lidTransform = isOpen
-      ? `translateY(-${HALF_SIZE_REM}rem) rotateX(170deg)` // Open state
-      : `translateY(-${HALF_SIZE_REM}rem) rotateX(90deg)`; // Closed state
   
     return (
       <div className="relative w-full h-96 flex items-center justify-center mt-24" style={{ perspective: '1000px' }}>
         
         {/* External items */}
-        <div className={`absolute flex items-center justify-center gap-4 transition-all duration-1000 ease-in-out ${elementsContainerClass}`}>
-            <HammerImage className="w-16 h-16" />
-            <AliveCatImage className="w-28 h-28" />
-            <VialImage isBroken={false} className="w-16 h-16" />
-        </div>
+        <AnimatePresence>
+          {isPreSimulation && (
+            <motion.div
+              key="initial-elements"
+              className="absolute flex items-center justify-center gap-4"
+              initial={{ y: -256, opacity: 1 }}
+              exit={{ y: 0, opacity: 0, scale: 0.5 }}
+              transition={{ duration: 1, ease: "easeIn" }}
+            >
+              <HammerImage className="w-16 h-16" />
+              <AliveCatImage className="w-28 h-28" />
+              <VialImage isBroken={false} className="w-16 h-16" />
+            </motion.div>
+          )}
+        </AnimatePresence>
         
         {/* Box container */}
-        <div className="relative w-56 h-56" style={{ transformStyle: 'preserve-3d', transform: 'rotateY(-30deg) rotateX(15deg)' }}>
+        <motion.div className="relative w-56 h-56" style={{ transformStyle: 'preserve-3d', transform: 'rotateY(-30deg) rotateX(15deg)' }} animate={isSuperposition ? "superposition" : "default"}>
             {/* Top (Lid) */}
-            <div 
-              className={`${faceBaseClass} bg-slate-800 transform-origin-bottom transition-transform duration-1000 ease-in-out`}
-              style={{ transform: lidTransform, transitionDelay: isPreSimulation ? '0ms' : '1000ms' }}
+            <motion.div
+              className={`${faceBaseClass} bg-slate-800 transform-origin-bottom`}
+              style={{ translateY: `-${HALF_SIZE_REM}rem` }}
+              initial={false}
+              animate={{ rotateX: isOpen ? 170 : 90 }}
+              transition={{ duration: 1, ease: "easeInOut", delay: isPreSimulation ? 0 : 1 }}
             />
 
             {/* Bottom */}
@@ -157,29 +164,42 @@ export const QuantumBox: React.FC<QuantumBoxProps> = ({ appState, catState }) =>
                 </p>
               )}
     
-              {isRevealing && (
-                 <div className="absolute inset-0 flex flex-col items-center justify-center animate-fade-in">
-                     {catState === CatState.ALIVE && <AliveCatImage className="w-28 h-28" />}
-                     {catState === CatState.DEAD && <DeadCatImage className="w-28 h-28" />}
-                     <div className="absolute -bottom-2 flex items-end gap-2">
-                         <HammerImage className="w-16 h-16" />
-                         <VialImage isBroken={catState === CatState.DEAD} className="w-16 h-16" />
-                     </div>
-                 </div>
-              )}
+              <AnimatePresence>
+                {isRevealing && (
+                  <motion.div
+                    className="absolute inset-0 flex flex-col items-center justify-center"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.5, duration: 0.5 }}
+                  >
+                    {catState === CatState.ALIVE && <AliveCatImage className="w-28 h-28" />}
+                    {catState === CatState.DEAD && <DeadCatImage className="w-28 h-28" />}
+                    <div className="absolute -bottom-2 flex items-end gap-2">
+                      <HammerImage className="w-16 h-16" />
+                      <VialImage isBroken={catState === CatState.DEAD} className="w-16 h-16" />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
-              <div className={`absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl transition-all duration-700 ease-in-out z-10 
-                  ${isSuperposition ? 'opacity-100 scale-100' : 'opacity-0 scale-0'}
-                  ${isRevealing && catState === CatState.ALIVE ? '!opacity-100 !scale-100' : ''}
-              `}>
-                {getLockText()}
-              </div>
+              <AnimatePresence>
+                {(isSuperposition || (isRevealing && catState === CatState.ALIVE)) && (
+                  <motion.div
+                    className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl z-10"
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1, transition: { delay: 1.2 } }}
+                    exit={{ opacity: 0, scale: 0 }}
+                  >
+                    {getLockText()}
+                  </motion.div>
+                )}
+              </AnimatePresence>
       
               {isRevealing && catState === CatState.DEAD && (
                   <div className="absolute inset-0 bg-red-900/50 rounded-lg animate-pulse" style={{ animationDuration: '0.5s' }} />
               )}
             </div>
-        </div>
+        </motion.div>
       </div>
     );
   };
