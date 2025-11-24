@@ -1,10 +1,17 @@
 // App.tsx
 "use client";
-import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { MemoryGame } from '../components/MemoryGame';
-import { QuantumBox } from '../components/QuantumBox';
-import { AppState, CatState } from '../types';
+import React, {
+  useState,
+  useCallback,
+  useMemo,
+  useRef,
+  useEffect,
+} from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { MemoryGame } from "../components/MemoryGame";
+import { QuantumBox } from "../components/QuantumBox";
+import { AppState, CatState } from "../types";
+import Image from "next/image";
 
 const App: React.FC = () => {
   const [appState, setAppState] = useState<AppState>(AppState.PRE_SIMULATION);
@@ -24,7 +31,7 @@ const App: React.FC = () => {
 
   const handleStart = () => {
     setAppState(AppState.SUPERPOSITION);
-    audioRef.current = new Audio('/sounds/cat-meow.mp3');
+    audioRef.current = new Audio("/sounds/cat-meow.mp3");
     audioRef.current.loop = true;
     audioRef.current.play();
     // Gera um tempo de decaimento aleatório entre 3 e 30 segundos
@@ -113,12 +120,16 @@ const App: React.FC = () => {
         {/* Left Column: Information */}
         <aside className="w-full md:w-1/3 p-6 md:p-8 border-b-2 md:border-b-0 md:border-r-2 border-cyan-500/20 text-center md:text-left flex flex-col">
           <div className="flex-1">
-            <h1
-              className="text-3xl md:text-4xl lg:text-5xl font-bold text-cyan-400 mb-2 tracking-wider text-center md:text-left"
-              style={{ textShadow: "0 0 10px #06b6d4, 0 0 5px #06b6d4" }}
-            >
-              Gato de Schrödinger
-            </h1>
+            <Image
+              src="/foto-bg.png"
+              alt="FOtoquantum"
+              width={350}
+              height={120}
+              className="mx-auto md:mx-0 brightness-110 contrast-125"
+              style={{
+                filter: "drop-shadow(0 0 15px rgba(6, 182, 212, 0.7))",
+              }}
+            />
             <h2 className="text-lg md:text-xl text-gray-300 mb-6 md:mb-8 opacity-80 text-center md:text-left">
               {getHeaderText()}
             </h2>
@@ -139,8 +150,8 @@ const App: React.FC = () => {
                 </h3>
                 <p className="text-sm leading-relaxed">
                   Enquanto a caixa está fechada, o gato existe em uma
-                  "superposição" de estados — ele é considerado simultaneamente{" "}
-                  <strong>vivo E morto</strong>.
+                  "superposição" de estados — ele é considerado{" "}
+                  <strong>Indefinico</strong>.
                 </p>
               </div>
               <div>
@@ -159,15 +170,17 @@ const App: React.FC = () => {
 
         {/* Right Column: Simulation */}
         <div className="w-full md:w-2/3 p-4 md:p-6 flex flex-col items-center justify-center">
-          <main className="w-full max-w-2xl flex flex-col items-center justify-center space-y-6">
-            <div className="w-full flex justify-center">
-              <QuantumBox appState={appState} catState={catState} />
-            </div>
-
-            {/* Game States */}
-            <div className="w-full flex flex-col items-center justify-center min-h-[200px]">
-              <AnimatePresence mode="wait">
-                {appState === AppState.PRE_SIMULATION && (
+          <main className="w-full flex flex-col items-center justify-center space-y-6">
+            <AnimatePresence mode="wait">
+              {appState === AppState.PRE_SIMULATION && (
+                <motion.div
+                  key="pre-simulation"
+                  className="flex flex-col items-center justify-center min-h-[400px] w-full"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <QuantumBox appState={appState} catState={catState} />
                   <motion.div
                     key="start-button"
                     initial={{ opacity: 0, scale: 0.8 }}
@@ -175,7 +188,7 @@ const App: React.FC = () => {
                     exit={{ opacity: 0, scale: 0.8 }}
                     transition={{ duration: 0.5 }}
                   >
-                    <motion.button
+                    <motion.button // Botão de Iniciar Simulação
                       onClick={handleStart}
                       className="px-8 py-4 bg-cyan-500 text-gray-900 font-bold rounded-lg shadow-lg shadow-cyan-500/50 text-lg"
                       whileHover={{ scale: 1.05, backgroundColor: "#22d3ee" }}
@@ -184,42 +197,46 @@ const App: React.FC = () => {
                       Iniciar Simulação
                     </motion.button>
                   </motion.div>
-                )}
+                </motion.div>
+              )}
 
-                {appState === AppState.SUPERPOSITION && showMemoryGame && (
-                  <motion.div
-                    key="memory-game"
-                    className="w-full flex justify-center"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
-                  >
+              {appState === AppState.SUPERPOSITION && (
+                <motion.div
+                  key="superposition"
+                  className="w-full flex flex-col lg:flex-row items-center justify-center gap-8"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <QuantumBox appState={appState} catState={catState} />
+                  {showMemoryGame && (
                     <MemoryGame
                       key={gameKey}
                       onSuccess={handleSuccess}
                       onDecay={handleDecay}
                       decayTime={decayTime}
                     />
-                  </motion.div>
-                )}
+                  )}
+                </motion.div>
+              )}
 
-                {appState === AppState.REVEALING && resultData && (
-                  <motion.div
-                    key="result-screen"
-                    className="text-center w-full"
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.5 }}
-                  >
+              {appState === AppState.REVEALING && resultData && (
+                <motion.div
+                  key="revealing"
+                  className="flex flex-col items-center justify-center min-h-[400px] w-full"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                >
+                  <QuantumBox appState={appState} catState={catState} />
+                  <div className="text-center w-full mt-8">
                     <h3
                       className={`text-2xl md:text-3xl font-bold ${resultData.titleClass} mb-4`}
                     >
                       {resultData.title}
                     </h3>
                     <p className="text-gray-400 mb-6">{resultData.text}</p>
-                    <motion.button
+                    <motion.button // Botão de Reset
                       onClick={handleReset}
                       className="px-8 py-3 bg-cyan-500 text-gray-900 font-bold rounded-lg shadow-lg shadow-cyan-500/50"
                       whileHover={{ scale: 1.05, backgroundColor: "#22d3ee" }}
@@ -227,10 +244,10 @@ const App: React.FC = () => {
                     >
                       {resultData.buttonText}
                     </motion.button>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </main>
         </div>
       </motion.div>
