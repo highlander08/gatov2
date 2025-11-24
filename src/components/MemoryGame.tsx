@@ -3,18 +3,23 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { Color } from "../types";
 import {
-  COLORS,
-  COLOR_MAP,
-  KEY_MAP,
   COLOR_STYLES,
   ACTIVE_COLOR_STYLES,
   SEQUENCE_INTERVAL,
   HIGHLIGHT_DURATION,
-  TOTAL_TIME, // Você pode remover esta importação se não for usada em outros lugares
 } from "../constants";
 
+const COLORS: Color[] = ["blue", "red", "green", "yellow"];
+
+const COLOR_MAP: { [key: string]: Color } = {
+  "1": "blue",
+  "2": "red",
+  "3": "green",
+  "4": "yellow",
+};
+
 interface MemoryGameProps {
-  onSuccess: () => void;
+  onSuccess: (timeTaken: number) => void;
   onDecay: () => void;
   decayTime: number;
 }
@@ -117,7 +122,8 @@ export const MemoryGame: React.FC<MemoryGameProps> = ({
           setIsGameActive(false);
           setIsPlayerTurn(false);
           setMessage("Sequência correta! Colapsando a função de onda...");
-          setTimeout(onSuccess, 1000);
+          const timeTaken = decayTime * 1000 - timeLeft;
+          setTimeout(() => onSuccess(timeTaken), 1000);
         }
       } else {
         setMessage("Erro! Observe a sequência novamente.");
@@ -133,12 +139,21 @@ export const MemoryGame: React.FC<MemoryGameProps> = ({
       sequence,
       onSuccess,
       playSequence,
+      decayTime,
     ]
   );
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      const digit = KEY_MAP[event.code];
+      // Mapeia diretamente o código da tecla para o dígito correspondente
+      const keyMap: { [key: string]: string } = {
+        Digit1: "1",
+        Digit2: "2",
+        Digit3: "3",
+        Digit4: "4",
+      };
+      const digit = keyMap[event.code];
+
       if (digit) {
         processPlayerInput(digit);
       }
@@ -201,7 +216,7 @@ export const MemoryGame: React.FC<MemoryGameProps> = ({
 
       {/* Game Interface */}
       <div className="flex flex-col items-center order-1">
-        <p className="text-lg md:text-xl h-20 mb-4 text-cyan-300 tracking-wider bg-black/30 w-full flex items-center justify-center rounded-md border border-cyan-500/30 max-w-md text-center px-2">
+        <p className="text-lg md:text-xl h-40 mb-4 text-cyan-300 tracking-wider bg-black/30 w-full flex items-center justify-center rounded-md border border-cyan-500/30 max-w-md text-center px-2">
           {message}
         </p>
         <motion.div

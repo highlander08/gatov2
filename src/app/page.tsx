@@ -20,6 +20,7 @@ const App: React.FC = () => {
   const [decayTime, setDecayTime] = useState(30);
   const [showMemoryGame, setShowMemoryGame] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [successTime, setSuccessTime] = useState<number | null>(null);
 
   // Efeito para limpar o áudio quando o componente for desmontado
   useEffect(() => {
@@ -28,6 +29,26 @@ const App: React.FC = () => {
       audio?.pause();
     };
   }, []);
+
+  useEffect(() => {
+    const handleSpacebar = (event: KeyboardEvent) => {
+      if (event.code !== "Space") return;
+
+      event.preventDefault(); // Evita o comportamento padrão da barra de espaço (rolar a página, etc.)
+
+      if (appState === AppState.PRE_SIMULATION) {
+        handleStart();
+      } else if (appState === AppState.REVEALING) {
+        handleReset();
+      }
+    };
+
+    window.addEventListener("keydown", handleSpacebar);
+
+    return () => {
+      window.removeEventListener("keydown", handleSpacebar);
+    };
+  }, [appState]); // A dependência 'appState' garante que o evento só funcione nos estados corretos.
 
   const handleStart = () => {
     setAppState(AppState.SUPERPOSITION);
@@ -41,10 +62,11 @@ const App: React.FC = () => {
     }, 1500);
   };
 
-  const handleSuccess = useCallback(() => {
+  const handleSuccess = useCallback((timeTaken: number) => {
     setCatState(CatState.ALIVE);
     setAppState(AppState.REVEALING);
     setShowMemoryGame(false);
+    setSuccessTime(timeTaken);
   }, []);
 
   const handleDecay = useCallback(() => {
@@ -59,6 +81,7 @@ const App: React.FC = () => {
     setAppState(AppState.PRE_SIMULATION);
     audioRef.current?.pause();
     setShowMemoryGame(false);
+    setSuccessTime(null);
     setGameKey((prevKey) => prevKey + 1);
   };
 
@@ -81,7 +104,7 @@ const App: React.FC = () => {
       }
     }
     return null;
-  }, [catState, appState]);
+  }, [catState, appState, successTime]);
 
   const getHeaderText = () => {
     switch (appState) {
@@ -235,6 +258,17 @@ const App: React.FC = () => {
                     >
                       {resultData.title}
                     </h3>
+                    {catState === CatState.ALIVE && successTime && (
+                      <div className="mb-4">
+                        <p className="text-sm text-cyan-300">Seu tempo:</p>
+                        <p
+                          className="text-5xl font-bold text-green-400"
+                          style={{ textShadow: "0 0 10px #22c55e" }}
+                        >
+                          {(successTime / 1000).toFixed(2)}s
+                        </p>
+                      </div>
+                    )}
                     <p className="text-gray-400 mb-6">{resultData.text}</p>
                     <motion.button // Botão de Reset
                       onClick={handleReset}
