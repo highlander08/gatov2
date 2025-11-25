@@ -226,7 +226,7 @@ export const QuantumBox: React.FC<QuantumBoxProps> = ({
             className="absolute flex items-center justify-center gap-4"
             initial={{ y: -256, opacity: 1 }}
             exit={{ y: 0, opacity: 0, scale: 0.5 }}
-            transition={{ duration: 1, ease: "easeIn" }}
+            transition={{ duration: 2, ease: "easeIn" }}
           >
             <HammerImage className="w-12 h-12" />
             <AliveCatImage className="w-24 h-24" />

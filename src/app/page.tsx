@@ -62,7 +62,7 @@ const App: React.FC = () => {
     setDecayTime(Math.floor(Math.random() * (30 - 3 + 1)) + 3);
     setTimeout(() => {
       setShowMemoryGame(true);
-    }, 1500);
+    }, 3000);
   };
 
   const handleSuccess = useCallback((timeTaken: number) => {
@@ -200,16 +200,30 @@ const App: React.FC = () => {
         {/* Right Column: Simulation */}
         <div className="w-full md:w-2/3 p-4 md:p-6 flex flex-col items-center justify-center">
           <main className="w-full flex flex-col items-center justify-center space-y-6">
-            <AnimatePresence mode="wait">
-              {appState === AppState.PRE_SIMULATION && (
-                <motion.div
-                  key="pre-simulation"
-                  className="flex flex-col items-center justify-center min-h-[400px] w-full"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <QuantumBox appState={appState} catState={catState} />
+            <div className="w-full flex flex-col lg:flex-row items-center justify-center gap-8 min-h-[480px]">
+              <QuantumBox appState={appState} catState={catState} />
+              <AnimatePresence mode="wait">
+                {appState === AppState.SUPERPOSITION && showMemoryGame && (
+                  <motion.div
+                    key="memory-game"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <MemoryGame
+                      key={gameKey}
+                      onSuccess={handleSuccess}
+                      onDecay={handleDecay}
+                      decayTime={decayTime}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            <div className="h-24 flex items-center justify-center">
+              <AnimatePresence mode="wait">
+                {appState === AppState.PRE_SIMULATION && (
                   <motion.div
                     key="start-button"
                     initial={{ opacity: 0, scale: 0.8 }}
@@ -219,75 +233,53 @@ const App: React.FC = () => {
                   >
                     <motion.button // Botão de Iniciar Simulação
                       onClick={handleStart}
-                      className="px-8 py-4 bg-cyan-500 text-gray-900 font-bold rounded-lg shadow-lg shadow-cyan-500/50 text-lg"
+                      className="px-8 py-4 mb-40 bg-cyan-500 text-gray-900 font-bold rounded-lg shadow-lg shadow-cyan-500/50 text-lg"
                       whileHover={{ scale: 1.05, backgroundColor: "#22d3ee" }}
                       whileTap={{ scale: 0.95 }}
                     >
                       Iniciar Simulação
                     </motion.button>
                   </motion.div>
-                </motion.div>
-              )}
-
-              {appState === AppState.SUPERPOSITION && (
-                <motion.div
-                  key="superposition"
-                  className="w-full flex flex-col lg:flex-row items-center justify-center gap-8"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <QuantumBox appState={appState} catState={catState} />
-                  {showMemoryGame && (
-                    <MemoryGame
-                      key={gameKey}
-                      onSuccess={handleSuccess}
-                      onDecay={handleDecay}
-                      decayTime={decayTime}
-                    />
-                  )}
-                </motion.div>
-              )}
-
-              {appState === AppState.REVEALING && resultData && (
-                <motion.div
-                  key="revealing"
-                  className="flex flex-col items-center justify-center min-h-[400px] w-full"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <QuantumBox appState={appState} catState={catState} />
-                  <div className="text-center w-full mt-8">
-                    <h3
-                      className={`text-2xl md:text-3xl font-bold ${resultData.titleClass} mb-4`}
-                    >
-                      {resultData.title}
-                    </h3>
-                    {catState === CatState.ALIVE && successTime && (
-                      <div className="mb-4">
-                        <p className="text-sm text-cyan-300">Seu tempo:</p>
-                        <p
-                          className="text-5xl font-bold text-green-400"
-                          style={{ textShadow: "0 0 10px #22c55e" }}
-                        >
-                          {(successTime / 1000).toFixed(2)}s
-                        </p>
-                      </div>
-                    )}
-                    <p className="text-gray-400 mb-6">{resultData.text}</p>
-                    <motion.button // Botão de Reset
-                      onClick={handleReset}
-                      className="px-8 py-3 bg-cyan-500 text-gray-900 font-bold rounded-lg shadow-lg shadow-cyan-500/50"
-                      whileHover={{ scale: 1.05, backgroundColor: "#22d3ee" }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      {resultData.buttonText}
-                    </motion.button>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                )}
+                {appState === AppState.REVEALING && resultData && (
+                  <motion.div
+                    key="revealing"
+                    className="flex flex-col items-center justify-center min-h-[400px] w-full"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <div className="text-center w-full mt-8">
+                      <h3
+                        className={`text-2xl md:text-3xl font-bold ${resultData.titleClass} mb-4`}
+                      >
+                        {resultData.title}
+                      </h3>
+                      {catState === CatState.ALIVE && successTime && (
+                        <div className="mb-4">
+                          <p className="text-sm text-cyan-300">Seu tempo:</p>
+                          <p
+                            className="text-5xl font-bold text-green-400"
+                            style={{ textShadow: "0 0 10px #22c55e" }}
+                          >
+                            {(successTime / 1000).toFixed(2)}s
+                          </p>
+                        </div>
+                      )}
+                      <p className="text-gray-400 mb-6">{resultData.text}</p>
+                      <motion.button // Botão de Reset
+                        onClick={handleReset}
+                        className="px-8 py-3 bg-cyan-500 text-gray-900 font-bold rounded-lg shadow-lg shadow-cyan-500/50"
+                        whileHover={{ scale: 1.05, backgroundColor: "#22d3ee" }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        {resultData.buttonText}
+                      </motion.button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </main>
         </div>
       </motion.div>
