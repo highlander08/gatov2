@@ -52,9 +52,12 @@ const App: React.FC = () => {
 
   const handleStart = () => {
     setAppState(AppState.SUPERPOSITION);
+    // Toca o som do miado uma vez
     audioRef.current = new Audio("/sounds/cat-meow.mp3");
-    audioRef.current.loop = true;
     audioRef.current.play();
+    // Para o som após 2 segundos (tempo da animação da caixa fechando)
+    setTimeout(() => audioRef.current?.pause(), 2000);
+
     // Gera um tempo de decaimento aleatório entre 3 e 30 segundos
     setDecayTime(Math.floor(Math.random() * (30 - 3 + 1)) + 3);
     setTimeout(() => {
@@ -67,11 +70,14 @@ const App: React.FC = () => {
     setAppState(AppState.REVEALING);
     setShowMemoryGame(false);
     setSuccessTime(timeTaken);
+
+    // Toca o som do miado como comemoração
+    const successAudio = new Audio("/sounds/cat-meow.mp3");
+    successAudio.play();
   }, []);
 
   const handleDecay = useCallback(() => {
     setCatState(CatState.DEAD);
-    audioRef.current?.pause();
     setAppState(AppState.REVEALING);
     setShowMemoryGame(false);
   }, []);
@@ -174,7 +180,7 @@ const App: React.FC = () => {
                 <p className="text-sm leading-relaxed">
                   Enquanto a caixa está fechada, o gato existe em uma
                   "superposição" de estados — ele é considerado{" "}
-                  <strong>Indefinico</strong>.
+                  <strong>Indefinido</strong>.
                 </p>
               </div>
               <div>

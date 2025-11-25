@@ -40,6 +40,7 @@ export const MemoryGame: React.FC<MemoryGameProps> = ({
   const [totalTime, setTotalTime] = useState(decayTime * 1000);
   const [isGameActive, setIsGameActive] = useState(false);
   const intervalRef = useRef<number | null>(null);
+  const startTimeRef = useRef<number>(0);
 
   const generateSequence = useCallback(() => {
     const sequenceLength = Math.floor(Math.random() * 4) + 3; // 3 to 6 colors
@@ -67,6 +68,7 @@ export const MemoryGame: React.FC<MemoryGameProps> = ({
           if (index === sequence.length - 1) {
             setIsPlayerTurn(true);
             setMessage("Sua vez! Repita a sequência.");
+            startTimeRef.current = performance.now(); // Inicia o cronômetro quando o jogador pode começar
             setPlayerSequence([]);
           }
         }, HIGHLIGHT_DURATION);
@@ -122,8 +124,8 @@ export const MemoryGame: React.FC<MemoryGameProps> = ({
           setIsGameActive(false);
           setIsPlayerTurn(false);
           setMessage("Sequência correta! Colapsando a função de onda...");
-          const timeTaken = decayTime * 1000 - timeLeft;
-          setTimeout(() => onSuccess(timeTaken), 1000);
+          const endTime = performance.now();
+          setTimeout(() => onSuccess(endTime - startTimeRef.current), 1000);
         }
       } else {
         setMessage("Erro! Observe a sequência novamente.");
@@ -132,15 +134,7 @@ export const MemoryGame: React.FC<MemoryGameProps> = ({
         setTimeout(playSequence, 1500);
       }
     },
-    [
-      isPlayerTurn,
-      isGameActive,
-      playerSequence,
-      sequence,
-      onSuccess,
-      playSequence,
-      decayTime,
-    ]
+    [isPlayerTurn, isGameActive, playerSequence, sequence, onSuccess]
   );
 
   useEffect(() => {

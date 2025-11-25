@@ -300,14 +300,32 @@ export const QuantumBox: React.FC<QuantumBoxProps> = ({
               }`}
           style={{ transform: `translateZ(${HALF_SIZE_REM}rem)` }}
         >
-          {(isPreSimulation || isSuperposition) && (
-            <p className="text-2xl text-flicker text-white text-center">
-              <span className="text-red-500 animate-pulse">
-                {" "}
-                Estado Indefinido
-              </span>
-            </p>
-          )}
+          <AnimatePresence mode="wait">
+            {isPreSimulation && (
+              <motion.p
+                key="pre-sim-text"
+                className="text-2xl font-bold text-cyan-300 text-center animate-pulse"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1, transition: { delay: 1 } }}
+                exit={{ opacity: 0 }}
+              >
+                Salve o gato ❤️
+              </motion.p>
+            )}
+            {isSuperposition && (
+              <motion.p
+                key="super-text"
+                className="text-2xl text-flicker text-white text-center"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1, transition: { delay: 1 } }}
+                exit={{ opacity: 0 }}
+              >
+                <span className="text-red-500 animate-pulse">
+                  Estado Indefinido
+                </span>
+              </motion.p>
+            )}
+          </AnimatePresence>
 
           <AnimatePresence>
             {isRevealing && (
